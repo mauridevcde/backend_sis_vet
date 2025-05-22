@@ -4,6 +4,7 @@ export type Usuario = {
   id_rol: number;
   usuario: string;
   password: string;
+  estado: number;
 };
 
 export type UsuarioRegister = {
@@ -11,9 +12,11 @@ export type UsuarioRegister = {
   id_rol: number;
   usuario: string;
   password: string;
+  estado: number;
 };
 
 export type UsuarioLogin = {
   usuario: string;
   password: string;
+  
 };

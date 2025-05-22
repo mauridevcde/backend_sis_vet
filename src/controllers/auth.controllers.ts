@@ -11,8 +11,8 @@ import { Request, Response } from "express";
 import { FieldPacket, QueryResult } from "mysql2";
 
 const verifyUserExists = async (usuario: string) => {
-  const [rows]: any = await pool.query(
-    "SELECT * FROM db_usuarios where Usuario = ?",
+  const [rows]: [QueryResult: any, FieldPacket[]] = await pool.query(
+    "SELECT * FROM usuarios where Usuario = ?",
     [usuario]
   );
 
@@ -23,9 +23,10 @@ const verifyUserExists = async (usuario: string) => {
   }
 };
 
-export const postregister = async (req: Request, res: Response) => {
+export const postregister = async ({ body }: Request, res: Response) => {
   // Manejamos los datos que vienen desde el body.
-  const { nombre_apellido, id_rol, usuario, password } = req.body as UsuarioRegister;
+  const { nombre_apellido, id_rol, usuario, password } =
+    body as UsuarioRegister;
 
   const verify = await verifyUserExists(usuario);
 
@@ -42,9 +43,9 @@ export const postregister = async (req: Request, res: Response) => {
       parseInt(process.env.saltRounds as string)
     );
 
-    const [rows] = await pool.query(
-      "INSERT INTO db_usuarios ( nombre_apellido, id_rol, usuario, password) VALUES (?,?,?,?)",
-      [nombre_apellido, id_rol, usuario, hashedPassword]
+    const [rows]: [QueryResult: any, FieldPacket[]] = await pool.query(
+      "INSERT INTO usuarios ( nombre_apellido, id_rol, usuario, password, estado) VALUES (?,?,?,?,?)",
+      [nombre_apellido, id_rol, usuario, hashedPassword, 1]
     );
     res.json({ msg: "Usuario Registrado con exito" });
   } catch (error) {
@@ -53,12 +54,12 @@ export const postregister = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<any> => {
   const { usuario, password } = req.body as UsuarioLogin;
 
   //si existe el usuario.
   const [user]: [QueryResult: any, FieldPacket[]] = await pool.query(
-    "SELECT * FROM db_usuarios where Usuario = ?",
+    "SELECT * FROM usuarios where Usuario = ?",
     [usuario]
   );
 
