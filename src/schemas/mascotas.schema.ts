@@ -17,19 +17,13 @@ export type mascota = {
   estado: number;
 };
 
-export type mascotaSinId = {
-  nombre: string;
-  id_categoria_animal: number;
-  raza: string;
-  sexo: number;
-  estado: number;
-};
+
 
 export const idParamsmascotaSchema = z.object({
   id: z
     .string()
-    .min(1, { message: "ID de mascota es requerido" })
-    .max(11, { message: "ID de mascota no puede exceder 100 caracteres" }),
+    .min(1, { message: "ID de CategMascotas es requerido" })
+    .max(11, { message: "ID de CategMascotas no puede exceder 100 caracteres" }),
 });
 
 export const postmascotaSchema = z.object({
