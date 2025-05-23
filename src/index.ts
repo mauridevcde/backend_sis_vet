@@ -9,6 +9,8 @@ import { VerifyAuthentication } from "./middleware/requireAuth";
 import clientes from "./routes/clientes.routes";
 import mascotas from "./routes/mascotas.routes";
 import categMascotas from "./routes/categoria_mascotas.routes";
+import veterinarios from "./routes/veterinarios.routes";
+import consultasClinicas from "./routes/consultasClinicas.routes";
 const app = express();
 
 const corsOptions = {
@@ -28,6 +30,8 @@ app.use("/auth", auth);
 app.use("/api", VerifyAuthentication, clientes);
 app.use("/api", VerifyAuthentication, mascotas);
 app.use("/api", VerifyAuthentication, categMascotas);
+app.use("/api", VerifyAuthentication, veterinarios);
+app.use("/api", VerifyAuthentication, consultasClinicas);
 
 app.listen(PORT);
 console.log(`Server corriendo en el puerto ${PORT}`);
