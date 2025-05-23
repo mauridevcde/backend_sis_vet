@@ -1,18 +1,17 @@
 import { Request, Response } from "express";
 import { pool } from "../db";
-import {
-  cliente,
-  deleteByIdclienteSchema,
-  getByIdclienteSchema,
-  postclienteSchema,
-  putclienteSchema,
-} from "../schemas/cliente.schema";
 import { FieldPacket } from "mysql2";
 import { ZodError } from "zod";
+import {
+  idParamsmascotaSchema,
+  mascota,
+  postmascotaSchema,
+  putmascotaSchema,
+} from "../schemas/mascotas.schema";
 
-export const getClientes = async (req: Request, res: Response) => {
+export const getMascotas = async (req: Request, res: Response) => {
   try {
-    const [rows] = await pool.query("SELECT * FROM clientes where estado = 1");
+    const [rows] = await pool.query("SELECT * FROM mascotas where estado = 1");
     console.log(rows);
     res.json(rows); //devuelve un json
   } catch (error) {
@@ -21,12 +20,12 @@ export const getClientes = async (req: Request, res: Response) => {
   }
 };
 
-export const getClientesById = async (
+export const getMascotasById = async (
   req: Request,
   res: Response
 ): Promise<any> => {
   try {
-    getByIdclienteSchema.parse(req.params);
+    idParamsmascotaSchema.parse(req.params);
   } catch (error) {
     if (error instanceof ZodError) {
       return res.status(400).json({
@@ -38,7 +37,7 @@ export const getClientesById = async (
   const { id } = req.params;
   try {
     const [rows]: any = await pool.query(
-      "SELECT * FROM clientes WHERE id_cliente = ? and estado = 1",
+      "SELECT * FROM mascotas WHERE id_mascota = ? and estado = 1",
       [id]
     );
 
@@ -52,12 +51,12 @@ export const getClientesById = async (
   }
 };
 
-export const postClientes = async (
+export const postMascotas = async (
   req: Request,
   res: Response
 ): Promise<any> => {
   try {
-    postclienteSchema.parse(req.body);
+    postmascotaSchema.parse(req.body);
   } catch (error) {
     if (error instanceof ZodError) {
       return res.status(400).json({
@@ -67,29 +66,18 @@ export const postClientes = async (
     }
   }
 
-  const {
-    nombre_apellido,
-    ruc,
-    ci,
-    nro_tel,
-    direccion,
-    correo,
-    id_mascota,
-    estado,
-  } = req.body as cliente;
+  const { nombre, id_categoria_animal, raza, sexo, estado } =
+    req.body as mascota;
   try {
     const [rows]: [QueryResult: any, FieldPacket[]] = await pool.query(
-      "INSERT INTO clientes (nombre_apellido, ruc, ci, nro_tel, direccion, correo, id_mascota, estado) VALUES (?, ?,?, ?,?, ?,?,?)",
-      [nombre_apellido, ruc, ci, nro_tel, direccion, correo, id_mascota, estado]
+      "INSERT INTO mascotas (nombre,id_categoria_animal,raza,sexo,estado) VALUES (?,?,?,?,?)",
+      [nombre, id_categoria_animal, raza, sexo, estado]
     );
     res.send({
-      nombre_apellido,
-      ruc,
-      ci,
-      nro_tel,
-      direccion,
-      correo,
-      id_mascota,
+      nombre,
+      id_categoria_animal,
+      raza,
+      sexo,
       estado,
     });
   } catch (error) {
@@ -98,13 +86,13 @@ export const postClientes = async (
   }
 };
 
-export const putClientes = async (
+export const putMascotas = async (
   req: Request,
   res: Response
 ): Promise<any> => {
   try {
-    putclienteSchema.parse(req.body);
-    getByIdclienteSchema.parse(req.params);
+    putmascotaSchema.parse(req.body);
+    idParamsmascotaSchema.parse(req.params);
   } catch (error) {
     if (error instanceof ZodError) {
       return res.status(400).json({
@@ -115,31 +103,13 @@ export const putClientes = async (
   }
 
   const { id } = req.params;
-  const {
-    nombre_apellido,
-    ruc,
-    ci,
-    nro_tel,
-    direccion,
-    correo,
-    id_mascota,
-    estado,
-  } = req.body as cliente;
+  const { nombre, id_categoria_animal, raza, sexo, estado } =
+    req.body as mascota;
   console.log(id);
   try {
     const [result]: any = await pool.query(
-      "UPDATE clientes SET nombre_apellido = IFNULL(?, nombre_apellido) , ruc = IFNULL(?, ruc), ci = IFNULL(?, ci), nro_tel = IFNULL(?, nro_tel), direccion = IFNULL(?, direccion), correo = IFNULL(?, correo), id_mascota = IFNULL(?, id_mascota), estado = IFNULL(?, estado) WHERE id_cliente = ?",
-      [
-        nombre_apellido,
-        ruc,
-        ci,
-        nro_tel,
-        direccion,
-        correo,
-        id_mascota,
-        estado,
-        id,
-      ]
+      "UPDATE mascotas SET nombre = IFNULL(?, nombre), id_categoria_animal = IFNULL(?, id_categoria_animal), raza = IFNULL(?, raza), sexo = IFNULL(?, sexo), estado = IFNULL(?, estado) WHERE id_mascota = ?",
+      [nombre, id_categoria_animal, raza, sexo, estado, id]
     );
 
     if (result.affectedRows <= 0) {
@@ -147,7 +117,7 @@ export const putClientes = async (
     }
     // ahora si existe el cliente y se actualizo correctamente llamamos a la base de datos para que nos devuelva el cliente actualizado
     const [rows]: [any[], FieldPacket[]] = await pool.query(
-      "SELECT * FROM clientes WHERE id_cliente = ?",
+      "SELECT * FROM mascotas WHERE id_mascota = ?",
       [id]
     );
 
@@ -158,13 +128,13 @@ export const putClientes = async (
   }
 };
 
-export const deleteCLientes = async (
+export const deleteMascotas = async (
   req: Request,
   res: Response
 ): Promise<any> => {
   //consultar si el fontend va a necesitar por el params o por el body.
   try {
-    deleteByIdclienteSchema.parse(req.params);
+    idParamsmascotaSchema.parse(req.params);
   } catch (error) {
     if (error instanceof ZodError) {
       return res.status(400).json({
@@ -180,7 +150,7 @@ export const deleteCLientes = async (
 
   try {
     const [result]: [QueryResult: any, FieldPacket[]] = await pool.query(
-      "UPDATE clientes SET Estado = 0 WHERE id_cliente = ?",
+      "UPDATE mascotas SET estado = 0 WHERE id_mascota = ?",
       [id]
     );
 
@@ -189,7 +159,7 @@ export const deleteCLientes = async (
     }
     // ahora si existe el cliente y se actualizo correctamente llamamos a la base de datos para que nos devuelva el cliente actualizado
     const [rows]: [QueryResult: any, FieldPacket[]] = await pool.query(
-      "SELECT * FROM clientes WHERE id_cliente = ?",
+      "SELECT * FROM mascotas WHERE id_mascota = ?",
       [id]
     );
     res.status(200).json({ msg: "Cliente Eliminado con Exito" });

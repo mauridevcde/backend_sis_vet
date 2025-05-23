@@ -7,6 +7,7 @@ import auth from "./routes/auth.routes";
 import { PORT } from "./config";
 import { VerifyAuthentication } from "./middleware/requireAuth";
 import clientes from "./routes/clientes.routes";
+import mascotas from "./routes/mascotas.routes";
 const app = express();
 
 const corsOptions = {
@@ -23,8 +24,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/auth", auth);
-
 app.use("/api", VerifyAuthentication, clientes);
+app.use("/api", VerifyAuthentication, mascotas);
 
 app.listen(PORT);
 console.log(`Server corriendo en el puerto ${PORT}`);
+
+

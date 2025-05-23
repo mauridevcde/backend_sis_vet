@@ -1,6 +1,12 @@
 import { pool } from "../db";
 
-import { Usuario, UsuarioLogin, UsuarioRegister } from "../types/usuario.types";
+import {
+  Usuario,
+  UsuarioLogin,
+  usuarioLoginSchema,
+  UsuarioRegister,
+  usuarioSchema,
+} from "../schemas/usuario.schema";
 
 import * as dotenv from "dotenv";
 
@@ -9,6 +15,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import { FieldPacket, QueryResult } from "mysql2";
+import { ZodError } from "zod";
 
 const verifyUserExists = async (usuario: string) => {
   const [rows]: [QueryResult: any, FieldPacket[]] = await pool.query(
@@ -23,9 +30,24 @@ const verifyUserExists = async (usuario: string) => {
   }
 };
 
-export const postregister = async ({ body }: Request, res: Response) => {
+export const postregister = async (
+  { body }: Request,
+  res: Response
+): Promise<any> => {
   // Manejamos los datos que vienen desde el body.
-  const { nombre_apellido, id_rol, usuario, password } =
+
+  try {
+    usuarioSchema.parse(body);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        msg: "Error en la validacion de los datos",
+        errors: error.errors,
+      });
+    }
+  }
+
+  const { nombre_apellido, id_rol, usuario, password, estado } =
     body as UsuarioRegister;
 
   const verify = await verifyUserExists(usuario);
@@ -45,7 +67,7 @@ export const postregister = async ({ body }: Request, res: Response) => {
 
     const [rows]: [QueryResult: any, FieldPacket[]] = await pool.query(
       "INSERT INTO usuarios ( nombre_apellido, id_rol, usuario, password, estado) VALUES (?,?,?,?,?)",
-      [nombre_apellido, id_rol, usuario, hashedPassword, 1]
+      [nombre_apellido, id_rol, usuario, hashedPassword, estado]
     );
     res.json({ msg: "Usuario Registrado con exito" });
   } catch (error) {
@@ -55,8 +77,18 @@ export const postregister = async ({ body }: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response): Promise<any> => {
+  try {
+    usuarioLoginSchema.parse(req.body);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        msg: "Error en la validacion de los datos",
+        errors: error.errors,
+      });
+    }
+  }
+  // Manejamos los datos que vienen desde el body.
   const { usuario, password } = req.body as UsuarioLogin;
-
   //si existe el usuario.
   const [user]: [QueryResult: any, FieldPacket[]] = await pool.query(
     "SELECT * FROM usuarios where Usuario = ?",
