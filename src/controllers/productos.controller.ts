@@ -9,7 +9,7 @@ import {
 import { FieldPacket } from "mysql2";
 import { ZodError } from "zod";
 
-export const getProductos = async (req: Request, res: Response) => {
+export const getProductos = async (req: Request, res: Response)  => {
   try {
     const [rows] = await pool.query("SELECT * FROM productos WHERE estado = 1");
     res.json(rows);
@@ -68,11 +68,17 @@ export const postProducto = async (req: Request, res: Response): Promise<any> =>
     unidad_medida,
     imagen,
     estado = 1,
+    TipoDeVenta,
+    iva,
+    id_usuario,
+    codigoDeBarra,
   } = req.body as producto;
 
   try {
     const [rows]: [any, FieldPacket[]] = await pool.query(
-      "INSERT INTO productos (nombre, fecha_vencimiento, id_proveedor, stock, precio_compra, precio_venta, unidad_medida, imagen, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      `INSERT INTO productos 
+      (nombre, fecha_vencimiento, id_proveedor, stock, precio_compra, precio_venta, unidad_medida, imagen, estado, TipoDeVenta, iva, id_usuario, codigoDeBarra) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         nombre,
         fecha_vencimiento,
@@ -83,6 +89,10 @@ export const postProducto = async (req: Request, res: Response): Promise<any> =>
         unidad_medida,
         imagen,
         estado,
+        TipoDeVenta,
+        iva,
+        id_usuario,
+        codigoDeBarra,
       ]
     );
     res.send({
@@ -95,6 +105,10 @@ export const postProducto = async (req: Request, res: Response): Promise<any> =>
       unidad_medida,
       imagen,
       estado,
+      TipoDeVenta,
+      iva,
+      id_usuario,
+      codigoDeBarra,
     });
   } catch (error) {
     console.log(error);
@@ -126,11 +140,29 @@ export const putProducto = async (req: Request, res: Response): Promise<any> => 
     unidad_medida,
     imagen,
     estado,
+    TipoDeVenta,
+    iva,
+    id_usuario,
+    codigoDeBarra,
   } = req.body as Partial<producto>;
 
   try {
     const [result]: any = await pool.query(
-      "UPDATE productos SET nombre = IFNULL(?, nombre), fecha_vencimiento = IFNULL(?, fecha_vencimiento), id_proveedor = IFNULL(?, id_proveedor), stock = IFNULL(?, stock), precio_compra = IFNULL(?, precio_compra), precio_venta = IFNULL(?, precio_venta), unidad_medida = IFNULL(?, unidad_medida), imagen = IFNULL(?, imagen), estado = IFNULL(?, estado) WHERE id_producto = ?",
+      `UPDATE productos SET 
+        nombre = IFNULL(?, nombre), 
+        fecha_vencimiento = IFNULL(?, fecha_vencimiento), 
+        id_proveedor = IFNULL(?, id_proveedor), 
+        stock = IFNULL(?, stock), 
+        precio_compra = IFNULL(?, precio_compra), 
+        precio_venta = IFNULL(?, precio_venta), 
+        unidad_medida = IFNULL(?, unidad_medida), 
+        imagen = IFNULL(?, imagen), 
+        estado = IFNULL(?, estado), 
+        TipoDeVenta = IFNULL(?, TipoDeVenta), 
+        iva = IFNULL(?, iva), 
+        id_usuario = IFNULL(?, id_usuario), 
+        codigoDeBarra = IFNULL(?, codigoDeBarra)
+      WHERE id_producto = ?`,
       [
         nombre,
         fecha_vencimiento,
@@ -141,6 +173,10 @@ export const putProducto = async (req: Request, res: Response): Promise<any> => 
         unidad_medida,
         imagen,
         estado,
+        TipoDeVenta,
+        iva,
+        id_usuario,
+        codigoDeBarra,
         id,
       ]
     );
@@ -174,7 +210,6 @@ export const deleteProducto = async (req: Request, res: Response): Promise<any> 
   }
 
   const { id } = req.params;
-  console.log(id);
 
   try {
     const [result]: [any, FieldPacket[]] = await pool.query(
