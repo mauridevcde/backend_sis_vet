@@ -14,6 +14,8 @@ import consultasClinicas from "./routes/consultasClinicas.routes";
 import vacunas from "./routes/vacunas.routes";
 import registrosClinicos from "./routes/registroClinicos.routes";
 import cirugias from "./routes/cirugias.routes";
+import proveedores from "./routes/proveedor.routes";
+import productos from "./routes/productos.routes";
 const app = express();
 
 const corsOptions = {
@@ -38,8 +40,8 @@ app.use("/api", VerifyAuthentication, vacunas);
 app.use("/api", VerifyAuthentication, registrosClinicos);
 app.use("/api", VerifyAuthentication, consultasClinicas);
 app.use("/api", VerifyAuthentication, cirugias);
-
-
+app.use("/api", VerifyAuthentication, proveedores);
+app.use("/api", VerifyAuthentication, productos);
 
 app.listen(PORT);
 console.log(`Server corriendo en el puerto ${PORT}`);
