@@ -17,6 +17,7 @@ import cirugias from "./routes/cirugias.routes";
 import proveedores from "./routes/proveedor.routes";
 import productos from "./routes/productos.routes";
 import compras from "./routes/compras.routes";
+import ventas from "./routes/ventas.routes";
 const app = express();
 
 const corsOptions = {
@@ -44,6 +45,7 @@ app.use("/api", VerifyAuthentication, cirugias);
 app.use("/api", VerifyAuthentication, proveedores);
 app.use("/api", VerifyAuthentication, productos);
 app.use("/api", VerifyAuthentication, compras);
+app.use("/api", VerifyAuthentication, ventas);
 
 app.listen(PORT);
 console.log(`Server corriendo en el puerto ${PORT}`);
