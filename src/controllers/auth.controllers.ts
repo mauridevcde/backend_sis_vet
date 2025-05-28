@@ -95,13 +95,22 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     [usuario]
   );
 
-  if (user[0] == undefined) return res.json({ msg: "usuario no existe" });
+  //si no existe el usuario.
+  //si el usuario no existe, retorna un mensaje de error. pero es mejor responder usuario o contraseña incorrecta.
+  //esto es para evitar que un atacante sepa si el usuario existe o no.
+  if (user[0] == undefined)
+    return res
+      .status(401)
+      .json({ mensaje: "Usuario o contraseña incorrectos" });
 
   //consulta sobre el usuario y la contraseña
   const hashedpassword = user[0].password;
   const decryptPass = await bcrypt.compare(password, hashedpassword);
 
-  if (!decryptPass) return res.json({ msg: "usuario o contraseña incorrecta" });
+  if (!decryptPass)
+    return res
+      .status(401)
+      .json({ mensaje: "Usuario o contraseña incorrectos" });
 
   const { id_usuario, nombre_apellido, id_rol } = user[0] as Usuario;
 
