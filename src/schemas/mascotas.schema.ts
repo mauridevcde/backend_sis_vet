@@ -15,15 +15,16 @@ export type mascota = {
   raza: string;
   sexo: number;
   estado: number;
+  id_cliente: number;
 };
-
-
 
 export const idParamsmascotaSchema = z.object({
   id: z
     .string()
     .min(1, { message: "ID de CategMascotas es requerido" })
-    .max(11, { message: "ID de CategMascotas no puede exceder 100 caracteres" }),
+    .max(11, {
+      message: "ID de CategMascotas no puede exceder 100 caracteres",
+    }),
 });
 
 export const postmascotaSchema = z.object({
@@ -35,7 +36,7 @@ export const postmascotaSchema = z.object({
     .number()
     .int()
     .min(1, { message: "ID de categoria animal es requerido" })
-    .max(100, { message: "ID de categoria animal no puede exceder 100" }),
+    .max(999, { message: "ID de categoria animal no puede exceder 100" }),
   raza: z
     .string()
     .min(1, { message: "Raza es requerido" })
@@ -50,6 +51,11 @@ export const postmascotaSchema = z.object({
     .int()
     .min(0, { message: "Estado es requerido" })
     .max(1, { message: "Estado no puede ser mayor a 1" }),
+  id_cliente: z
+    .number()
+    .int()
+    .min(1, { message: "El id del cliente es requerido" })
+    .max(9999, { message: "ID de cliente no puede exceder 100" }),
 });
 
 export const putmascotaSchema = z.object({
@@ -61,7 +67,7 @@ export const putmascotaSchema = z.object({
     .number()
     .int()
     .min(1, { message: "ID de categoria animal es requerido" })
-    .max(100, { message: "ID de categoria animal no puede exceder 100" }),
+    .max(999999, { message: "ID de categoria animal no puede exceder 999999" }),
   raza: z
     .string()
     .min(1, { message: "Raza es requerido" })
@@ -76,4 +82,9 @@ export const putmascotaSchema = z.object({
     .int()
     .min(0, { message: "Estado es requerido" })
     .max(1, { message: "Estado no puede ser mayor a 1" }),
+    id_cliente: z
+    .number()
+    .int()
+    .min(1, { message: "El id del cliente es requerido" })
+    .max(999999, { message: "ID de cliente no puede exceder 999999" }),
 });

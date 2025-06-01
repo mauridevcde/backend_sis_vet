@@ -42,7 +42,37 @@ export const getMascotasById = async (
     );
 
     if (rows.length <= 0) {
-      return res.status(404).json({ msg: "No existe el cliente" });
+      return res.status(404).json({ msg: "No existe la mascota con ese Id" });
+    }
+    res.json(rows[0]); //devuelve un json
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500).json({ msg: "Error en el servidor" });
+  }
+};
+export const getMascotasByClientId = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    idParamsmascotaSchema.parse(req.params);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        msg: "Error en la validacion de los datos",
+        errors: error.errors,
+      });
+    }
+  }
+  const { id } = req.params;
+  try {
+    const [rows]: any = await pool.query(
+      "SELECT * FROM mascotas WHERE id_cliente = ? and estado = 1",
+      [id]
+    );
+
+    if (rows.length <= 0) {
+      return res.status(404).json({ msg: "No existe mascota de ese cliente" });
     }
     res.json(rows[0]); //devuelve un json
   } catch (error) {
@@ -66,12 +96,12 @@ export const postMascotas = async (
     }
   }
 
-  const { nombre, id_categoria_animal, raza, sexo, estado } =
+  const { nombre, id_categoria_animal, raza, sexo, estado, id_cliente } =
     req.body as mascota;
   try {
     const [rows]: [QueryResult: any, FieldPacket[]] = await pool.query(
-      "INSERT INTO mascotas (nombre,id_categoria_animal,raza,sexo,estado) VALUES (?,?,?,?,?)",
-      [nombre, id_categoria_animal, raza, sexo, estado]
+      "INSERT INTO mascotas (nombre,id_categoria_animal,raza,sexo,estado,id_cliente) VALUES (?,?,?,?,?,?)",
+      [nombre, id_categoria_animal, raza, sexo, estado,id_cliente]
     );
     res.send({
       nombre,
@@ -79,6 +109,7 @@ export const postMascotas = async (
       raza,
       sexo,
       estado,
+      id_cliente
     });
   } catch (error) {
     console.log(error);
@@ -103,17 +134,17 @@ export const putMascotas = async (
   }
 
   const { id } = req.params;
-  const { nombre, id_categoria_animal, raza, sexo, estado } =
+  const { nombre, id_categoria_animal, raza, sexo, estado, id_cliente } =
     req.body as mascota;
   console.log(id);
   try {
     const [result]: any = await pool.query(
-      "UPDATE mascotas SET nombre = IFNULL(?, nombre), id_categoria_animal = IFNULL(?, id_categoria_animal), raza = IFNULL(?, raza), sexo = IFNULL(?, sexo), estado = IFNULL(?, estado) WHERE id_mascota = ?",
-      [nombre, id_categoria_animal, raza, sexo, estado, id]
+      "UPDATE mascotas SET nombre = IFNULL(?, nombre), id_categoria_animal = IFNULL(?, id_categoria_animal), raza = IFNULL(?, raza), sexo = IFNULL(?, sexo), estado = IFNULL(?, estado), id_cliente = IFNULL(?, id_cliente) WHERE id_mascota = ?",
+      [nombre, id_categoria_animal, raza, sexo, estado, id, id_cliente]
     );
 
     if (result.affectedRows <= 0) {
-      return res.status(404).json({ msg: "No existe el cliente" });
+      return res.status(404).json({ msg: "No existe la mascota" });
     }
     // ahora si existe el cliente y se actualizo correctamente llamamos a la base de datos para que nos devuelva el cliente actualizado
     const [rows]: [any[], FieldPacket[]] = await pool.query(
@@ -162,7 +193,7 @@ export const deleteMascotas = async (
       "SELECT * FROM mascotas WHERE id_mascota = ?",
       [id]
     );
-    res.status(200).json({ msg: "Cliente Eliminado con Exito" });
+    res.status(200).json({ msg: "Mascota Eliminado con Exito" });
   } catch (error) {
     console.log(error);
     res.sendStatus(500).json({ msg: "Error en el servidor" });

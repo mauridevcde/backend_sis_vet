@@ -7,7 +7,6 @@ export type cliente = {
   nro_tel: string;
   direccion: string;
   correo: string;
-  id_mascota: number;
   estado: number;
 };
 
@@ -40,11 +39,6 @@ export const postclienteSchema = z.object({
     .string()
     .email({ message: "Correo electrónico inválido" })
     .nonempty({ message: "Correo electrónico es requerido" }),
-  id_mascota: z
-    .number()
-    .int()
-    .min(1, { message: "ID de mascota es requerido" })
-    .max(100000, { message: "ID de mascota no puede exceder 100" }),
   estado: z
     .number()
     .int()
@@ -81,11 +75,6 @@ export const putclienteSchema = z.object({
     .string()
     .email({ message: "Correo electrónico inválido" })
     .nonempty({ message: "Correo electrónico es requerido" }),
-  id_mascota: z
-    .number()
-    .int()
-    .min(1, { message: "ID de mascota es requerido" })
-    .max(100000, { message: "ID de mascota no puede exceder 100" }),
   estado: z
     .number()
     .int()

@@ -74,13 +74,12 @@ export const postClientes = async (
     nro_tel,
     direccion,
     correo,
-    id_mascota,
     estado,
   } = req.body as cliente;
   try {
     const [rows]: [QueryResult: any, FieldPacket[]] = await pool.query(
-      "INSERT INTO clientes (nombre_apellido, ruc, ci, nro_tel, direccion, correo, id_mascota, estado) VALUES (?, ?,?, ?,?, ?,?,?)",
-      [nombre_apellido, ruc, ci, nro_tel, direccion, correo, id_mascota, estado]
+      "INSERT INTO clientes (nombre_apellido, ruc, ci, nro_tel, direccion, correo, estado) VALUES (?, ?,?, ?,?, ?,?)",
+      [nombre_apellido, ruc, ci, nro_tel, direccion, correo, estado]
     );
     res.send({
       nombre_apellido,
@@ -89,7 +88,7 @@ export const postClientes = async (
       nro_tel,
       direccion,
       correo,
-      id_mascota,
+    
       estado,
     });
   } catch (error) {
@@ -122,13 +121,12 @@ export const putClientes = async (
     nro_tel,
     direccion,
     correo,
-    id_mascota,
     estado,
   } = req.body as cliente;
   console.log(id);
   try {
     const [result]: any = await pool.query(
-      "UPDATE clientes SET nombre_apellido = IFNULL(?, nombre_apellido) , ruc = IFNULL(?, ruc), ci = IFNULL(?, ci), nro_tel = IFNULL(?, nro_tel), direccion = IFNULL(?, direccion), correo = IFNULL(?, correo), id_mascota = IFNULL(?, id_mascota), estado = IFNULL(?, estado) WHERE id_cliente = ?",
+      "UPDATE clientes SET nombre_apellido = IFNULL(?, nombre_apellido) , ruc = IFNULL(?, ruc), ci = IFNULL(?, ci), nro_tel = IFNULL(?, nro_tel), direccion = IFNULL(?, direccion), correo = IFNULL(?, correo), estado = IFNULL(?, estado) WHERE id_cliente = ?",
       [
         nombre_apellido,
         ruc,
@@ -136,7 +134,6 @@ export const putClientes = async (
         nro_tel,
         direccion,
         correo,
-        id_mascota,
         estado,
         id,
       ]
