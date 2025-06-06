@@ -22,8 +22,8 @@ export const idParamsmascotaSchema = z.object({
   id: z
     .string()
     .min(1, { message: "ID de CategMascotas es requerido" })
-    .max(11, {
-      message: "ID de CategMascotas no puede exceder 100 caracteres",
+    .max(11111111, {
+      message: "ID de CategMascotas no puede exceder 1111111 caracteres",
     }),
 });
 

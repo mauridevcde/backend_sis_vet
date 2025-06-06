@@ -140,7 +140,7 @@ export const putMascotas = async (
   try {
     const [result]: any = await pool.query(
       "UPDATE mascotas SET nombre = IFNULL(?, nombre), id_categoria_animal = IFNULL(?, id_categoria_animal), raza = IFNULL(?, raza), sexo = IFNULL(?, sexo), estado = IFNULL(?, estado), id_cliente = IFNULL(?, id_cliente) WHERE id_mascota = ?",
-      [nombre, id_categoria_animal, raza, sexo, estado, id, id_cliente]
+      [nombre, id_categoria_animal, raza, sexo, estado , id_cliente, id]
     );
 
     if (result.affectedRows <= 0) {
