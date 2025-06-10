@@ -41,7 +41,7 @@ export const idParamsProductosSchema = z.object({
 });
 
 export const postProductoSchema = z.object({
-  nombre: z.string().min(1).max(50),
+  nombre: z.string().min(1).max(100),
   fecha_vencimiento: z
     .string()
     .refine((date) => !isNaN(Date.parse(date)), {
