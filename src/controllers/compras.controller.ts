@@ -52,10 +52,7 @@ export const getDetallesCompra = async (
 ): Promise<any> => {
   try {
     const { id } = req.params;
-    const [rows] = await pool.query(
-      "SELECT * FROM detalle_compras",
-      [id]
-    );
+    const [rows] = await pool.query("SELECT * FROM detalle_compras", [id]);
     if (!Array.isArray(rows) || rows.length === 0)
       return res.status(404).json({ msg: "Detalles no encontrados" });
     res.json(rows);
@@ -97,6 +94,16 @@ export const postCompraCompleta = async (
           compra.SubTotal,
         ]
       );
+
+      if (
+        !compraResult.insertId ||
+        compraResult.insertId == 0 ||
+        compraResult.insertId == "" ||
+        compraResult.insertId == null ||
+        compraResult.insertId == false
+      ) {
+        throw new Error("no se ha obtenido el id de la compra!!!");
+      }
 
       const id_compra = compraResult.insertId;
 
