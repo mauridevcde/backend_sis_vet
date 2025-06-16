@@ -149,3 +149,43 @@ export const postCompraCompleta = async (
     res.status(500).json({ msg: "Error en el servidor", error });
   }
 };
+
+//consulta de compra con join con view
+export const getAllComprasJoin = async (_: Request, res: Response) => {
+  try {
+    const [rows] = await pool.query(
+      "SELECT id_compra, razon_social, nombre_apellido, TotalNeto, fecha_compra FROM sis_veterinaria.viewallcompras;"
+    );
+    console.log(rows);
+
+    res.json(rows);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({ msg: "Error del servidor", error });
+  }
+};
+
+// Obtener compra por ID
+export const getDetalleByCompraID = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    getByIdCompraSchema.parse(req.params);
+    const { id } = req.params;
+    const [rows] = await pool.query(
+      "select dc.id_detalle_compra,dc.id_compra,p2.nombre,u2.nombre_apellido,dc.cantidad,dc.costo, dc.subtotal,dc.iva, dc.CostoMedio from detalle_compras dc left join productos p2 on dc.id_producto = p2.id_producto left join usuarios u2 on dc.id_usuario =  u2.id_usuario where dc.id_compra = ?",
+      [id]
+    );
+    if (!Array.isArray(rows) || rows.length === 0)
+      return res.status(404).json({ msg: "Detalle de Compra sin coincidencias" });
+    res.json(rows);
+  } catch (error) {
+    if (error instanceof ZodError)
+      return res
+        .status(400)
+        .json({ msg: "Validación fallida", error: error.errors });
+    res.status(500).json({ msg: "Error del servidor", error });
+  }
+};
