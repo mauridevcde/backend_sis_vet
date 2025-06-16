@@ -154,7 +154,7 @@ export const postCompraCompleta = async (
 export const getAllComprasJoin = async (_: Request, res: Response) => {
   try {
     const [rows] = await pool.query(
-      "SELECT id_compra, razon_social, nombre_apellido, TotalNeto, fecha_compra FROM sis_veterinaria.viewallcompras;"
+      "SELECT c.id_compra, p.razon_social, u.nombre_apellido, c.TotalNeto, c.fecha_compra from compras c inner join usuarios u on u.id_usuario = c.id_usuario inner join proveedores p on p.id_proveedor = c.id_proveedor"
     );
     console.log(rows);
 
@@ -179,7 +179,9 @@ export const getDetalleByCompraID = async (
       [id]
     );
     if (!Array.isArray(rows) || rows.length === 0)
-      return res.status(404).json({ msg: "Detalle de Compra sin coincidencias" });
+      return res
+        .status(404)
+        .json({ msg: "Detalle de Compra sin coincidencias" });
     res.json(rows);
   } catch (error) {
     if (error instanceof ZodError)
