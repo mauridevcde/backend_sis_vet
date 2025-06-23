@@ -134,28 +134,28 @@ export const getAllVentaJoin = async (_: Request, res: Response) => {
   }
 };
 
-// // Obtener venta por ID
-// export const getDetalleByVentaID = async (
-//   req: Request,
-//   res: Response
-// ): Promise<any> => {
-//   try {
-//     getByIdVentaSchema.parse(req.params);
-//     const { id } = req.params;
-//     const [rows] = await pool.query(
-//       "select dc.id_detalle_compra,dc.id_compra,p2.nombre,u2.nombre_apellido,dc.cantidad,dc.costo, dc.subtotal,dc.iva, dc.CostoMedio from detalle_compras dc left join productos p2 on dc.id_producto = p2.id_producto left join usuarios u2 on dc.id_usuario =  u2.id_usuario where dc.id_compra = ?",
-//       [id]
-//     );
-//     if (!Array.isArray(rows) || rows.length === 0)
-//       return res
-//         .status(404)
-//         .json({ msg: "Detalle de Compra sin coincidencias" });
-//     res.json(rows);
-//   } catch (error) {
-//     if (error instanceof ZodError)
-//       return res
-//         .status(400)
-//         .json({ msg: "Validación fallida", error: error.errors });
-//     res.status(500).json({ msg: "Error del servidor", error });
-//   }
-// };
+// Obtener venta por ID
+export const getDetalleByVentaID = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    getByIdVentaSchema.parse(req.params);
+    const { id } = req.params;
+    const [rows] = await pool.query(
+      "SELECT d.id_detalle_venta, v.id_venta, p.nombre, u.nombre_apellido, d.precio_unitario, d.cantidad, d.subtotal, d.iva FROM detalle_ventas d inner join ventas v on v.id_venta = d.id_venta inner join usuarios u on u.id_usuario = d.id_usuario inner join productos p on p.id_producto = d.id_producto where d.id_venta = ?",
+      [id]
+    );
+    if (!Array.isArray(rows) || rows.length === 0)
+      return res
+        .status(404)
+        .json({ msg: "Detalle de ventas sin coincidencias" });
+    res.json(rows);
+  } catch (error) {
+    if (error instanceof ZodError)
+      return res
+        .status(400)
+        .json({ msg: "Validación fallida", error: error.errors });
+    res.status(500).json({ msg: "Error del servidor", error });
+  }
+};
