@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export type detalleVenta = z.infer<typeof postVentaSchema>;
 
+
+
 // Schema venta (cabecera)
 export const postVentaSchema = z.object({
   id_cliente: z.number().int(),

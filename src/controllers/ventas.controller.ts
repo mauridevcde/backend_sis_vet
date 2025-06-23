@@ -8,6 +8,7 @@ import {
 } from "../schemas/ventas.schema";
 import { ZodError } from "zod";
 import { FieldPacket, QueryResult, ResultSetHeader } from "mysql2";
+import { pool } from "../db";
 
 //get all ventas
 export const getAllVentas = async (
@@ -117,3 +118,44 @@ export const postVentaCompleta = async (
     res.status(500).json({ msg: "Error del servidor" });
   }
 };
+
+//consulta de venta con join con view
+export const getAllVentaJoin = async (_: Request, res: Response) => {
+  try {
+    const [rows] = await pool.query(
+      "select v.id_venta, c.nombre_apellido as cliente, u.nombre_apellido as usuario, v.fecha_venta, v.total from ventas v inner join clientes c on c.id_cliente = v.id_cliente inner join usuarios u on u.id_usuario = v.id_usuario"
+    );
+
+    res.json(rows);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({ msg: "Error del servidor", error });
+  }
+};
+
+// // Obtener venta por ID
+// export const getDetalleByVentaID = async (
+//   req: Request,
+//   res: Response
+// ): Promise<any> => {
+//   try {
+//     getByIdVentaSchema.parse(req.params);
+//     const { id } = req.params;
+//     const [rows] = await pool.query(
+//       "select dc.id_detalle_compra,dc.id_compra,p2.nombre,u2.nombre_apellido,dc.cantidad,dc.costo, dc.subtotal,dc.iva, dc.CostoMedio from detalle_compras dc left join productos p2 on dc.id_producto = p2.id_producto left join usuarios u2 on dc.id_usuario =  u2.id_usuario where dc.id_compra = ?",
+//       [id]
+//     );
+//     if (!Array.isArray(rows) || rows.length === 0)
+//       return res
+//         .status(404)
+//         .json({ msg: "Detalle de Compra sin coincidencias" });
+//     res.json(rows);
+//   } catch (error) {
+//     if (error instanceof ZodError)
+//       return res
+//         .status(400)
+//         .json({ msg: "Validación fallida", error: error.errors });
+//     res.status(500).json({ msg: "Error del servidor", error });
+//   }
+// };
