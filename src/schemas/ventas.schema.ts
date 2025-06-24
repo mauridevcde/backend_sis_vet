@@ -42,3 +42,7 @@ export const postDetalleVentaSchema = z.object({
 export const getByIdVentaSchema = z.object({
   id: z.string().min(1),
 });
+
+export const mesSchema  = z.object({
+  mes: z.string().min(1),
+});

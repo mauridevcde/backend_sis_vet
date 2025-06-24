@@ -5,10 +5,12 @@ import {
   postDetalleVentaSchema,
   getByIdVentaSchema,
   detalleVenta,
+  mesSchema,
 } from "../schemas/ventas.schema";
 import { ZodError } from "zod";
-import { FieldPacket, QueryResult, ResultSetHeader } from "mysql2";
+import { FieldPacket, ResultSetHeader } from "mysql2";
 import { pool } from "../db";
+import { log } from "node:console";
 
 //get all ventas
 export const getAllVentas = async (
@@ -157,5 +159,102 @@ export const getDetalleByVentaID = async (
         .status(400)
         .json({ msg: "Validación fallida", error: error.errors });
     res.status(500).json({ msg: "Error del servidor", error });
+  }
+};
+
+//TODO::
+// ventas diarias del mes actual incluyendo días sin ventas.
+export const getVentasPorDia = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    // Validar el query param
+    mesSchema.parse(req.query);
+    const { mes } = req.query;
+
+    const inicioMes = `${mes}-01`;
+
+    const sql = `
+      WITH RECURSIVE dias_del_mes AS (
+        SELECT DATE(?) AS fecha
+        UNION ALL
+        SELECT DATE_ADD(fecha, INTERVAL 1 DAY)
+        FROM dias_del_mes
+        WHERE MONTH(fecha) = MONTH(?)
+      )
+      SELECT 
+        d.fecha,
+        IFNULL(SUM(dv.subtotal), 0) AS total
+      FROM dias_del_mes d
+      LEFT JOIN ventas v ON DATE(v.fecha_venta) = d.fecha
+      LEFT JOIN detalle_ventas dv ON v.id_venta = dv.id_venta
+      GROUP BY d.fecha
+      ORDER BY d.fecha;
+    `;
+
+    const [rows] = await pool.query(sql, [inicioMes, inicioMes]);
+
+    res.json(rows);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return res
+        .status(400)
+        .json({ msg: "Validación fallida", error: error.errors });
+    }
+
+    console.error("Error en getVentasPorDia:", error);
+    res.status(500).json({ msg: "Error del servidor", error });
+  }
+};
+
+//ventas mensuales del año actual
+export const getVentasMensuales = async (req: Request, res: Response) => {
+  try {
+    const year = parseInt(req.query.anio as string) || new Date().getFullYear();
+    const sql = `
+      SELECT MONTH(v.fecha_venta) AS mes,
+             IFNULL(SUM(dv.subtotal), 0) AS total,
+             COUNT(DISTINCT v.id_venta) AS ventas_count
+      FROM ventas v
+      LEFT JOIN detalle_ventas dv ON v.id_venta = dv.id_venta
+      WHERE YEAR(v.fecha_venta) = ?
+      GROUP BY mes
+      ORDER BY mes;
+    `;
+    const [rows]: any = await pool.query(sql, [year]);
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Error en ventas mensuales", err });
+  }
+};
+
+//total de ventas por mes
+
+export const getTotalVentasPorMes = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const mes = typeof req.query.mes === "string" ? req.query.mes : "";
+
+  const formatoMes = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+  if (!formatoMes.test(mes)) {
+    return res.status(400).json({ msg: "Mes inválido" });
+  }
+
+  try {
+    const [rows]: any = await pool.query(
+      `SELECT IFNULL(SUM(dv.subtotal), 0) AS total
+       FROM ventas v
+       JOIN detalle_ventas dv ON v.id_venta = dv.id_venta
+       WHERE DATE_FORMAT(v.fecha_venta, '%Y-%m') = ?`,
+      [mes]
+    );
+
+    return res.json(rows[0]); // 👈 retorno explícito siempre
+  } catch (err) {
+    return res.status(500).json({ msg: "Error en servidor", err });
   }
 };
